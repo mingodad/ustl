@@ -45,6 +45,7 @@
 	#define __attribute__(p)
     #endif
 #endif
+#define WEAKALIAS(sym)		__attribute__((weak,alias(sym)))
 #if __GNUC__ >= 4
     #define DLL_EXPORT		__attribute__((visibility("default")))
     #define DLL_LOCAL		__attribute__((visibility("hidden")))
@@ -262,7 +263,7 @@
 #endif
 
 #if HAVE_CPP11
-    #define USTL_LIBSUPCPP_LINKARG	"@libsupc++@"
+    #define USTL_LIBSUPCPP_LINKARG	" @libsupc++@"
     static_assert (sizeof(USTL_LIBSUPCPP_LINKARG) == sizeof(" -lsupc++"),
 	"configure was unable to find required library libsupc++.a . This "
 	"may occur if your distribution violates the Linux Filesystem "

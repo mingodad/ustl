@@ -103,10 +103,10 @@ true	= has_trivial_destructor<TTA>
 false	= has_trivial_destructor<Polymorphic>
 true	= is_signed<int>
 false	= is_signed<unsigned int>
-true	= is_signed<float>
+false	= is_signed<float>
 false	= is_unsigned<int>
 true	= is_unsigned<unsigned int>
-false	= is_unsigned<float>
+true	= is_unsigned<float>
 true	= sizeof(char) == alignment_of<char>
 true	= sizeof(short) == alignment_of<short>
 true	= sizeof(int) == alignment_of<int>

@@ -169,7 +169,7 @@ int main (void)
     };
     uint i, caps;
 
-    printf ("s/ \\?@INLINE_OPTS@/");
+    printf ("s/ @INLINE_OPTS@/");
 #if __GNUC__ >= 3
     #if __clang__
     #elif __GNUC__ >= 4
@@ -186,7 +186,7 @@ int main (void)
 #endif
     printf ("/g\n");
 #if __GNUC__ != 3
-    printf ("s/ \\?@libgcc_eh@//g\n");
+    printf ("s/ @libgcc_eh@//g\n");
 #endif
 #if defined(__GNUC__) || defined(__GLIBC_HAVE_LONG_LONG)
     printf (SET(HAVE_LONG_LONG,1) SET(SIZE_OF_LONG_LONG,%zd), sizeof(long long));
@@ -203,7 +203,7 @@ int main (void)
 #if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
     printf (SET(HAVE_VECTOR_EXTENSIONS,1));
 #else
-    printf ("s/ \\?-Wshadow//g\n");
+    printf ("s/-Wshadow //g\n");
 #endif
     printf ("s/@BYTE_ORDER@/%s_ENDIAN/g\n"
 	SET(RETSIGTYPE,void)
@@ -226,7 +226,7 @@ int main (void)
 	if (caps & (1 << s_CpuCaps[i].bit))
 	    printf (SET(CPU_HAS_%s,1), s_CpuCaps[i].name);
 #if __GNUC__ >= 3
-    printf ("s/ \\?@PROCESSOR_OPTS@/");
+    printf ("s/ @PROCESSOR_OPTS@/");
     #if (__clang_major__ > 3 || (__clang_major__ == 3 && __clang_minor__ >= 2)) || (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
 	printf (" -std=c++11 -march=native");
     #else
@@ -237,7 +237,7 @@ int main (void)
     #endif
     printf ("/g\n");
 #else
-    printf ("s/ \\?@PROCESSOR_OPTS@//g\n");
+    printf ("s/ @PROCESSOR_OPTS@//g\n");
 #endif
     return (0);
 }
@@ -265,7 +265,7 @@ else
     echo 's/#undef \(HAVE_THREE_CHAR_TYPES\)/#define \1 1/g' >>config.sed
 fi
 if [ "$SYSNAME" = "bsd" ]; then
-    echo 's/ \?@libgcc_eh@//g
+    echo 's/ @libgcc_eh@//g
 	s/#define WITHOUT_LIBSTDCPP 1/#undef WITHOUT_LIBSTDCPP/g
 	s/NOLIBSTDCPP	= -nodefaultlibs /#NOLIBSTDCPP	= -nodefaultlibs/g
 	s/-Wredundant-decls/-Wno-redundant-decls/g
@@ -279,7 +279,7 @@ elif [ "$SYSNAME" = "alpha" ]; then
 	s/#BUILD_STATIC	= 1/BUILD_STATIC	= 1 /g" >>config.sed
 fi
 if [ "$SYSNAME" = "mac" ]; then
-    echo 's/ \?@libgcc_eh@//g
+    echo 's/ @libgcc_eh@//g
 	s/@SYSWARNS@/-Wno-long-double/g
 	s/lib$1.so/lib$1.dylib/g
 	s/lib$1.so.${MAJOR}.${MINOR}.${BUILD}/lib$1.${MAJOR}.${MINOR}.${BUILD}.dylib/g
@@ -287,7 +287,7 @@ if [ "$SYSNAME" = "mac" ]; then
 	s/lib$1.so.${MAJOR}/lib$1.${MAJOR}.dylib/g
 	s/@SHBLDFL@/-Wl,-single_module -compatibility_version 1 -current_version 1 -install_name $1 -Wl,-Y,1455 -dynamiclib -mmacosx-version-min=10.4/g' >>config.sed
 else
-    echo 's/ \?@SYSWARNS@//g' >>config.sed
+    echo 's/ @SYSWARNS@//g' >>config.sed
 fi
 if [ "$SYSNAME" = "alpha" -o "$SYSNAME" = "mac" ]; then
     echo 's/#undef \(SIZE_OF_BOOL\)/#define \1 SIZE_OF_LONG/g' >>config.sed
@@ -297,7 +297,7 @@ fi
 if [ "$SYSNAME" = "linux" ]; then
     echo 's/#undef \(HAVE_RINTF\)/#define \1 1/g' >>config.sed
 else
-    echo 's/ \?-mfpmath=sse//g' >>config.sed
+    echo 's/ -mfpmath=sse//g' >>config.sed
 fi
 if [ "$SYSNAME" = "mac" -o "$SYSNAME" = "bsd" ]; then
     echo 's/#define \(HAVE_STRSIGNAL\) 1/#undef \1/g' >>config.sed
@@ -393,9 +393,9 @@ s/@customincdir@/${ac_var_customincdir:=$ac_var_prefix\/include}/g
 s/@customlibdir@/${ac_var_customlibdir:=$ac_var_prefix\/lib}/g" >>config.sed
 
 if [ "$ac_var_prefix" != "\/usr\/local" -a "$ac_var_prefix" != "\/usr" ]; then
-    echo "s/ \?@CUSTOMINCDIR@/ -I$ac_var_customincdir/g;s/ \?@CUSTOMLIBDIR@/ -L$ac_var_customlibdir/g" >>config.sed
+    echo "s/ @CUSTOMINCDIR@/ -I$ac_var_customincdir/g;s/ @CUSTOMLIBDIR@/ -L$ac_var_customlibdir/g" >>config.sed
 else
-    echo "s/ \?@CUSTOMINCDIR@//g;s/ \?@CUSTOMLIBDIR@//g" >>config.sed
+    echo "s/ @CUSTOMINCDIR@//g;s/ @CUSTOMLIBDIR@//g" >>config.sed
 fi
 
 #### Find headers, libs, programs, and subs ##########################
@@ -427,7 +427,7 @@ for i in $LIBS; do
 	done
 	[ -z "$found" ] || break
     done
-    echo "s/ \?@lib$i@/$found/g" >>config.sed
+    echo "s/ @lib$i@/$found/g" >>config.sed
 done
 
 for i in $PROGS; do
@@ -449,7 +449,7 @@ done
 for i in $ENVIRONS; do
     esciv="`eval echo '"'\$\{$i\}'"'|sed 's/\//\\\&/g'`"
     [ ! -z "$esciv" ] && esciv=" $esciv"
-    echo "s/ \?@$i@/$esciv/g" >>config.sed
+    echo "s/ @$i@/$esciv/g" >>config.sed
 done
 echo "$CUSTSUBS" >>config.sed
 }

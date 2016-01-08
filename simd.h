@@ -428,14 +428,14 @@ SIMD_CONVERT_SPEC(4,int32_t,float,fround) {
 	 :: "m"(oout[0]), "m"(oin[0]), "m"(oin[2]) : "xmm0", "memory");
 }
 template <> inline int32_t fround<float,int32_t>::operator()(const float& a) const {
-    register int32_t rv;
+    int32_t rv;
     asm ("movss %1, %%xmm0\n\t"
 	 "cvtss2si %%xmm0, %0"
 	 : "=r"(rv) : "m"(a) : "xmm0" );
     return rv;
 }
 template <> inline uint32_t fround<float,uint32_t>::operator()(const float& a) const {
-    register uint32_t rv;
+    uint32_t rv;
     asm ("movss %1, %%xmm0\n\t"
 	 "cvtss2si %%xmm0, %0"
 	 : "=r"(rv) : "m"(a) : "xmm0" );

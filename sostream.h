@@ -33,6 +33,7 @@ public:
     inline void			iwrite (unsigned long int v)	{ iformat (v); }
     inline void			iwrite (float v)		{ iformat (v); }
     inline void			iwrite (double v)		{ iformat (v); }
+    inline void			iwrite (long double v)		{ iformat (v); }
     void			iwrite (bool v);
     inline void			iwrite (const char* s)		{ write (s, strlen(s)); }
     inline void			iwrite (const string& v)	{ write (v.begin(), v.size()); }
@@ -86,6 +87,7 @@ PRINTF_TYPESTRING_SPEC (long,		"ld")
 PRINTF_TYPESTRING_SPEC (unsigned long,	"lu")
 PRINTF_TYPESTRING_SPEC (float,		"f")
 PRINTF_TYPESTRING_SPEC (double,		"lf")
+PRINTF_TYPESTRING_SPEC (long double,	"Lf")
 #if HAVE_LONG_LONG
 PRINTF_TYPESTRING_SPEC (long long,	"lld")
 PRINTF_TYPESTRING_SPEC (unsigned long long, "llu")
@@ -157,13 +159,13 @@ OSTRSTREAM_CAST_OPERATOR (char,			uint8_t)
 // Manipulators
 
 namespace {
-static /*constexpr*/ const struct Sendl {
-    Sendl(){}
+static constexpr const struct Sendl {
+    inline constexpr Sendl (void) {}
     inline void text_write (ostringstream& os) const	{ os << '\n'; os.flush(); }
     inline void write (ostream& os) const		{ os.iwrite ('\n'); }
 } endl;
-static /*constexpr*/ const struct Sflush {
-    Sflush(){}
+static constexpr const struct Sflush {
+    inline constexpr Sflush (void) {}
     inline void text_write (ostringstream& os) const	{ os.flush(); }
     inline void write (ostringstream& os) const		{ os.flush(); }
     inline void write (ostream&) const			{ }

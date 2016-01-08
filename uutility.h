@@ -153,8 +153,8 @@ UNVOID_DISTANCE(const,)
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // The compiler issues a warning if an unsigned type is compared to 0.
-template <typename T, bool IsSigned> struct __is_negative { inline constexpr bool operator()(const T& v) { return v < 0; } };
-template <typename T> struct __is_negative<T,false> { inline constexpr bool operator()(const T&) { return false; } };
+template <typename T, bool IsSigned> struct __is_negative { inline constexpr bool operator()(const T& v) const { return v < 0; } };
+template <typename T> struct __is_negative<T,false> { inline constexpr bool operator()(const T&) const { return false; } };
 /// Warning-free way to check if \p v is negative, even if for unsigned types.
 template <typename T> inline constexpr bool is_negative (const T& v) { return __is_negative<T,numeric_limits<T>::is_signed>()(v); }
 #endif

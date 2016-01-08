@@ -30,3 +30,13 @@ s2 is empty [], capacity 5 bytes
 <31 bytes of 31> Format '<const] 42, [rfile>, 0xDEADBEEF'
 Custom vararg MyFormat: '<const] 42, [rfile>, 0xDEADBEEF'
 hash_value(s2) = 95A714F3, string::hash(s2) = 95A714F3
+stoi("42") = 42
+stol("-42") = -42
+stoul("42") = 42
+stof("4.2") = 4.20
+stod("4.2") = 4.20
+stold("4.2") = 4.20
+to_string(42) = 42
+to_string(4.2f) = 4.200000
+to_string(4.2) = 4.200000
+to_string(ld(4.2)) = 4.200000

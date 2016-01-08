@@ -8,9 +8,9 @@
 #include <stdlib.h>
 
 /// Just like malloc, but throws on failure.
-void* tmalloc (size_t n) throw (ustl::bad_alloc) __attribute__((malloc));
+extern "C" void* tmalloc (size_t n) __attribute__((malloc));
 /// Just like free, but doesn't crash when given a nullptr.
-inline void nfree (void* p) noexcept { if (p) free (p); }
+extern "C" void nfree (void* p) noexcept;
 
 #if WITHOUT_LIBSTDCPP
 
@@ -25,13 +25,13 @@ inline void nfree (void* p) noexcept { if (p) free (p); }
 //  Placement new and delete signatures (take a memory address argument,
 //  does nothing) may not be replaced by a user's program.
 //
-inline void* operator new (size_t n) throw (std::bad_alloc)	{ return tmalloc (n); }
-inline void* operator new[] (size_t n) throw (std::bad_alloc)	{ return tmalloc (n); }
-inline void  operator delete (void* p)				{ nfree (p); }
-inline void  operator delete[] (void* p)			{ nfree (p); }
+void* operator new (size_t n);
+void* operator new[] (size_t n);
+void  operator delete (void* p) noexcept;
+void  operator delete[] (void* p) noexcept;
 #if HAVE_CPP14
-inline void  operator delete (void* p, size_t)			{ nfree (p); }
-inline void  operator delete[] (void* p, size_t)		{ nfree (p); }
+void  operator delete (void* p, size_t);
+void  operator delete[] (void* p, size_t);
 #endif
 
 // Default placement versions of operator new.

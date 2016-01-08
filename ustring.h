@@ -303,5 +303,54 @@ inline hashvalue_t hash_value (const char* v)
 { return hash_value (v, v + strlen(v)); }
 
 //----------------------------------------------------------------------
+// String-number conversions
+
+#define STRING_TO_INT_CONVERTER(name,type,func)	\
+inline type name (const string& str, size_t* idx = nullptr, int base = 10) \
+{					\
+    const char* sp = str.c_str();	\
+    char* endp = nullptr;		\
+    type r = func (sp, &endp, base);	\
+    if (idx)				\
+	*idx = endp - sp;		\
+    return r;				\
+}
+STRING_TO_INT_CONVERTER(stoi,int,strtol)
+STRING_TO_INT_CONVERTER(stol,long,strtol)
+STRING_TO_INT_CONVERTER(stoul,unsigned long,strtoul)
+#if HAVE_LONG_LONG
+STRING_TO_INT_CONVERTER(stoll,long long,strtoll)
+STRING_TO_INT_CONVERTER(stoull,unsigned long long,strtoull)
+#endif
+#undef STRING_TO_INT_CONVERTER
+
+#define STRING_TO_FLOAT_CONVERTER(name,type,func) \
+inline type name (const string& str, size_t* idx = nullptr) \
+{					\
+    const char* sp = str.c_str();	\
+    char* endp = nullptr;		\
+    type r = func (sp, &endp);		\
+    if (idx)				\
+	*idx = endp - sp;		\
+    return r;				\
+}
+STRING_TO_FLOAT_CONVERTER(stof,float,strtof)
+STRING_TO_FLOAT_CONVERTER(stod,double,strtod)
+STRING_TO_FLOAT_CONVERTER(stold,long double,strtold)
+#undef STRING_TO_FLOAT_CONVERTER
+
+#define NUMBER_TO_STRING_CONVERTER(type,fmts)\
+    inline string to_string (type v) { string r; r.format(fmts,v); return r; }
+NUMBER_TO_STRING_CONVERTER(int,"%d")
+NUMBER_TO_STRING_CONVERTER(long,"%ld")
+NUMBER_TO_STRING_CONVERTER(unsigned long,"%lu")
+#if HAVE_LONG_LONG
+NUMBER_TO_STRING_CONVERTER(long long,"%lld")
+NUMBER_TO_STRING_CONVERTER(unsigned long long,"%llu")
+#endif
+NUMBER_TO_STRING_CONVERTER(float,"%f")
+NUMBER_TO_STRING_CONVERTER(double,"%lf")
+NUMBER_TO_STRING_CONVERTER(long double,"%Lf")
+#undef NUMBER_TO_STRING_CONVERTER
 
 } // namespace ustl

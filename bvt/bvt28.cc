@@ -11,9 +11,9 @@ struct make_array {};
 template <typename T>
 struct make_array<T,2> { static array<T,2> make (void) { array<T,2> v {{ 1, 2 }}; return v; } };
 template <typename T>
-struct make_array<T,4> { static array<T,4> make (void) { array<T,4> v = { 1, 2, 3, 4 }; return v; } };
+struct make_array<T,4> { static array<T,4> make (void) { array<T,4> v = {{ 1, 2, 3, 4 }}; return v; } };
 template <typename T>
-struct make_array<T,8> { static array<T,8> make (void) { array<T,8> v ({ 1, 2, 3, 4, 5, 6, 7, 8 }); return v; } };
+struct make_array<T,8> { static array<T,8> make (void) { array<T,8> v {{ 1, 2, 3, 4, 5, 6, 7, 8 }}; return v; } };
 #endif
 
 template <typename T, size_t N>
@@ -26,7 +26,7 @@ void TestArray (const char* ctrType)
 #if HAVE_CPP11
     array<T,N> pt1 (make_array<T,N>::make());
     array<T,N> pt2;
-    pt2 = {4,4};
+    pt2 = {{4,4}};
     pt2.fill (pt2[0]);
     pt2 += {1,2,3,4,1,2,3,4};
 #else

@@ -119,6 +119,18 @@ void TestString (void)
     MyFormat ("'<const] %d, %s, 0x%08X'", 42, "[rfile>", 0xDEADBEEF);
 
     cout.format ("hash_value(s2) = %08X, string::hash(s2) = %08X\n", hash_value (s2.begin()), string::hash (s2.begin(), s2.end()));
+
+    cout << "stoi(\"42\") = " << stoi("42") << endl;
+    cout << "stol(\"-42\") = " << stol("-42") << endl;
+    cout << "stoul(\"42\") = " << stoul("42") << endl;
+    cout << "stof(\"4.2\") = " << stof("4.2") << endl;
+    cout << "stod(\"4.2\") = " << stod("4.2") << endl;
+    cout << "stold(\"4.2\") = " << stold("4.2") << endl;
+
+    cout << "to_string(42) = " << to_string(42) << endl;
+    cout << "to_string(4.2f) = " << to_string(4.2f) << endl;
+    cout << "to_string(4.2) = " << to_string(4.2) << endl;
+    cout << "to_string(ld(4.2)) = " << to_string((long double)(4.2)) << endl;
 }
 
 void MyFormat (const char* fmt, ...)
