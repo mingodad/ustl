@@ -40,8 +40,10 @@ static inline void movsd (const void*& src, size_t nWords, void*& dest)
 	: "memory");
 }
 
+#if CPU_HAS_MMX
 template <> inline void stosv (uint8_t*& p, size_t n, uint8_t v)
 { asm volatile ("rep;\n\tstosb" : "=&D"(p), "=c"(n) : "0"(p), "1"(n), "a"(v) : "memory"); }
+#endif
 template <> inline void stosv (uint16_t*& p, size_t n, uint16_t v)
 { asm volatile ("rep;\n\tstosw" : "=&D"(p), "=c"(n) : "0"(p), "1"(n), "a"(v) : "memory"); }
 template <> inline void stosv (uint32_t*& p, size_t n, uint32_t v)

@@ -30,7 +30,7 @@ LIBDIR		:= @libdir@
 ################ Compiler options ####################################
 
 WARNOPTS	:= -Wall -Wextra -Woverloaded-virtual -Wpointer-arith\
-		-Wshadow -Wredundant-decls -Wcast-qual @SYSWARNS@
+		-Wshadow -Wredundant-decls -Wcast-qual
 TGTOPTS		:= @PROCESSOR_OPTS@ @CUSTOMINCDIR@
 INLINEOPTS	:= @INLINE_OPTS@
 

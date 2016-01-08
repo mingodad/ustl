@@ -73,7 +73,7 @@ public:
     inline void		relink (const void* p, streamsize n)	{ cmemlink::relink (p, n); _pos = 0; }
     inline void		relink (const cmemlink& l)		{ relink (l.cdata(), l.readable_size()); }
     virtual void	unlink (void) noexcept override;
-    inline virtual streamsize	underflow (streamsize = 1)	{ return remaining(); }
+    virtual streamsize	underflow (streamsize = 1);
     inline uoff_t	pos (void) const	{ return _pos; }
     inline const_iterator ipos (void) const	{ return begin() + pos(); }
     inline streamsize	remaining (void) const	{ return size() - pos(); }

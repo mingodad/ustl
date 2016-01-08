@@ -57,6 +57,7 @@ public:
     inline int		fd (void) const			{ return _file.fd(); }
     inline void		stat (struct stat& rs) const	{ _file.stat (rs); }
     inline void		set_nonblock (bool v = true)	{ _file.set_nonblock (v); }
+    void		set_buffer_size (size_type sz);
     inline int		ioctl (const char* rname, int request, long argument = 0)	{ return _file.ioctl (rname, request, argument); }
     inline int		ioctl (const char* rname, int request, int argument)		{ return _file.ioctl (rname, request, argument); }
     inline int		ioctl (const char* rname, int request, void* argument)		{ return _file.ioctl (rname, request, argument); }

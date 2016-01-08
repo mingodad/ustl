@@ -24,18 +24,27 @@ public:
 				istringstream (void) noexcept;
 				istringstream (const void* p, size_type n) noexcept;
     explicit			istringstream (const cmemlink& source) noexcept;
-    void			iread (int8_t& v)	{ v = skip_delimiters(); }
-    void			iread (int32_t& v);
+    inline void			iread (char& v)			{ v = skip_delimiters(); }
+    inline void			iread (unsigned char& v)	{ char c; iread(c); v = c; }
+    void			iread (int& v);
+    inline void			iread (unsigned int& v)		{ int c; iread(c); v = c; }
+    inline void			iread (short& v)		{ int c; iread(c); v = c; }
+    inline void			iread (unsigned short& v)	{ int c; iread(c); v = c; }
+    void			iread (long& v);
+    inline void			iread (unsigned long& v)	{ long c; iread(c); v = c; }
+#if HAVE_THREE_CHAR_TYPES
+    void			iread (signed char& v)		{ char c; iread(c); v = c; }
+#endif
+#if HAVE_LONG_LONG
+    void			iread (long long& v);
+    inline void			iread (unsigned long long& v)	{ long long c; iread(c); v = c; }
+#endif
     void			iread (double& v);
+    inline void			iread (float& v)		{ double c; iread(c); v = c; }
+    inline void			iread (long double& v)		{ double c; iread(c); v = c; }
     void			iread (bool& v);
     void			iread (wchar_t& v);
     void			iread (string& v);
-#if HAVE_INT64_T
-    void			iread (int64_t& v);
-#endif
-#if HAVE_LONG_LONG && (!HAVE_INT64_T || SIZE_OF_LONG_LONG > 8)
-    void			iread (long long& v);
-#endif
     inline string		str (void) const	{ string s; s.link (*this); return s; }
     inline istringstream&	str (const string& s)	{ link (s); return *this; }
     inline istringstream&	get (char& c)	{ return read (&c, sizeof(c)); }
@@ -45,7 +54,7 @@ public:
     istringstream&		getline (char* p, size_type n, char delim = '\n');
     istringstream&		getline (string& s, char delim = '\n');
     istringstream&		ignore (size_type n, char delim = '\0');
-    inline char			peek (void)	{ int8_t v; iread (v); ungetc(); return v; }
+    inline char			peek (void)	{ char v = get(); ungetc(); return v; }
     inline istringstream&	putback (char)	{ ungetc(); return *this; }
     inline istringstream&	unget (void)	{ ungetc(); return *this; }
     inline void			set_delimiters (const char* delimiters);
@@ -87,15 +96,6 @@ inline void istringstream::set_delimiters (const char* delimiters)
     memcpy (_delimiters, delimiters, min (strlen(delimiters),sizeof(_delimiters)-1));
 }
 
-/// Reads one type as another.
-template <typename RealT, typename CastT>
-inline void _cast_read (istringstream& is, RealT& v)
-{
-    CastT cv;
-    is.iread (cv);
-    v = RealT (cv);
-}
-
 /// Reads a line of text from \p is into \p s
 inline istringstream& getline (istringstream& is, string& s)
     { return is.getline (s); }
@@ -121,29 +121,4 @@ inline istringstream& operator>> (istringstream& is, T& v) {
 template <> struct object_text_reader<string> {
     inline void operator()(istringstream& is, string& v) const { is.iread (v); }
 };
-#define ISTRSTREAM_CAST_OPERATOR(RealT, CastT)		\
-template <> struct integral_text_object_reader<RealT> {	\
-    inline void operator() (istringstream& is, RealT& v) const	\
-	{ _cast_read<RealT,CastT>(is, v); }		\
-};
-ISTRSTREAM_CAST_OPERATOR (uint8_t,	int8_t)
-ISTRSTREAM_CAST_OPERATOR (int16_t,	int32_t)
-ISTRSTREAM_CAST_OPERATOR (uint16_t,	int32_t)
-ISTRSTREAM_CAST_OPERATOR (uint32_t,	int32_t)
-ISTRSTREAM_CAST_OPERATOR (float,	double)
-#if HAVE_THREE_CHAR_TYPES
-ISTRSTREAM_CAST_OPERATOR (char,		int8_t)
-#endif
-#if HAVE_INT64_T
-ISTRSTREAM_CAST_OPERATOR (uint64_t,	int64_t)
-#endif
-#if SIZE_OF_LONG == SIZE_OF_INT
-ISTRSTREAM_CAST_OPERATOR (long,		int)
-ISTRSTREAM_CAST_OPERATOR (unsigned long,int)
-#endif
-#if HAVE_LONG_LONG && (!HAVE_INT64_T || SIZE_OF_LONG_LONG > 8)
-ISTRSTREAM_CAST_OPERATOR (unsigned long long, long long)
-#endif
-#undef ISTRSTREAM_CAST_OPERATOR
-
 } // namespace ustl

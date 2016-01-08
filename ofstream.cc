@@ -26,7 +26,7 @@ ofstream::ofstream (void)
 : ostringstream()
 ,_file()
 {
-    reserve (255);
+    reserve (default_stream_buffer_size);
 }
 
 /// Constructs a stream for writing to \p ofd
@@ -35,7 +35,7 @@ ofstream::ofstream (int ofd)
 ,_file (ofd)
 {
     clear (_file.rdstate());
-    reserve (255);
+    reserve (default_stream_buffer_size);
 }
 
 /// Constructs a stream for writing to \p filename.
@@ -65,9 +65,7 @@ void ofstream::close (void)
 /// Flushes the buffer to the file.
 ostream& ofstream::flush (void)
 {
-    clear();
-    while (good() && pos() && overflow (remaining())) {}
-    clear (_file.rdstate());
+    while (good() && pos() && overflow (capacity())) {}
     return *this;
 }
 
@@ -83,65 +81,83 @@ ofstream& ofstream::seekp (off_t p, seekdir d)
 /// Called when more buffer space (\p n bytes) is needed.
 ofstream::size_type ofstream::overflow (size_type n)
 {
-    if (eof() || (n > remaining() && n < capacity() - pos()))
-	return ostringstream::overflow (n);
-    size_type bw = _file.write (cdata(), pos());
-    clear (_file.rdstate());
-    erase (begin(), bw);
-    if (remaining() < n)
-	ostringstream::overflow (n);
-    return remaining();
+    if (_file.good() && n > capacity() - pos()) {
+	size_type bw = _file.write (cdata(), pos());
+	erase (begin(), bw);
+    }
+    return ostringstream::overflow (n);
 }
 
 //----------------------------------------------------------------------
 
+/// Constructs an unattached stream
+ifstream::ifstream (void)
+: istringstream()
+,_buffer()
+,_file()
+{
+    set_buffer_size (default_stream_buffer_size);
+}
+
 /// Constructs a stream to read from \p ifd.
 ifstream::ifstream (int ifd)
-: istringstream ()
-,_buffer (255,'\0')
+: istringstream()
+,_buffer()
 ,_file (ifd)
 {
-    link (_buffer.data(), streamsize(0));
+    set_buffer_size (default_stream_buffer_size);
 }
 
 /// Constructs a stream to read from \p filename.
 ifstream::ifstream (const char* filename, openmode mode)
-: istringstream ()
-,_buffer (255,'\0')
+: istringstream()
+,_buffer()
 ,_file (filename, mode)
 {
+    set_buffer_size (default_stream_buffer_size);
     clear (_file.rdstate());
+}
+
+/// Set the size of the input buffer
+void ifstream::set_buffer_size (size_type sz)
+{
+    _buffer.resize (sz);
+    #ifndef NDEBUG
+	fill (_buffer.begin(), _buffer.end(), 0xcd);
+    #endif
     link (_buffer.data(), streamsize(0));
 }
 
 /// Reads at least \p n more bytes and returns available bytes.
 ifstream::size_type ifstream::underflow (size_type n)
 {
-    if (eof())
-	return istringstream::underflow (n);
+    if (!_file.eof()) {
+	const ssize_t freeSpace = _buffer.size() - pos();
+	const ssize_t neededFreeSpace = max (n, _buffer.size() / 2);
+	const size_t oughtToErase = Align (max (0, neededFreeSpace - freeSpace));
+	const size_type nToErase = min (pos(), oughtToErase);
+	_buffer.memlink::erase (_buffer.begin(), nToErase);
+	const uoff_t oldPos (pos() - nToErase);
 
-    const ssize_t freeSpace = _buffer.size() - pos();
-    const ssize_t neededFreeSpace = max (n, _buffer.size() / 2);
-    const size_t oughtToErase = Align (max (0, neededFreeSpace - freeSpace));
-    const size_type nToErase = min (pos(), oughtToErase);
-    _buffer.memlink::erase (_buffer.begin(), nToErase);
-    const uoff_t oldPos (pos() - nToErase);
+	size_type br = oldPos;
+	if (_buffer.size() - br < n) {
+	    _buffer.resize (br + neededFreeSpace);
+	    link (_buffer.data(), streamsize(0));
+	}
+	if (_file.fd() == STDIN_FILENO)
+	    cout.flush();
 
-    size_type br = oldPos;
-    if (_buffer.size() - br < n) {
-	_buffer.resize (br + neededFreeSpace);
-	link (_buffer.data(), streamsize(0));
+	size_type brn = 1;
+	for (; br < oldPos + n && brn && _file.good(); br += brn)
+	    brn = _file.readsome (_buffer.begin() + br, _buffer.size() - br);
+	clear (_file.rdstate());
+
+	_buffer[br] = 0;
+	link (_buffer.data(), br);
+	seek (oldPos);
     }
-    cout.flush();
-
-    size_type brn = 1;
-    for (; br < oldPos + n && brn && _file.good(); br += brn)
-	brn = _file.readsome (_buffer.begin() + br, _buffer.size() - br);
-    clear (_file.rdstate());
-
-    _buffer[br] = 0;
-    link (_buffer.data(), br);
-    seek (oldPos);
+    if (_file.eof())
+	verify_remaining ("read", _file.name(), n);
     return remaining();
 }
 

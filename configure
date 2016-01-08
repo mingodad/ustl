@@ -59,7 +59,7 @@ locale.h alloca.h signal.h stdarg.h stddef.h sys/stat.h sys/types.h stdint.h
 stdlib.h string.h time.h unistd.h math.h stdlib.h sys/mman.h execinfo.h";
 
 # Libraries
-LIBS="supc++ gcc_eh SystemStubs"
+LIBS="supc++ gcc_eh c++abi SystemStubs"
 
 # First pair is used if nothing matches
 PROGS="CC=gcc CC=clang CC=cc CXX=g++ CXX=clang++ CXX=c++ DOXYGEN=doxygen LD=ld AR=ar RANLIB=ranlib RANLIB=touch INSTALL=install"
@@ -192,7 +192,7 @@ int main (void)
     printf (SET(HAVE_LONG_LONG,1) SET(SIZE_OF_LONG_LONG,%zd), sizeof(long long));
 #endif
 #if defined(__GNUC__) || (__WORDSIZE == 64) || defined(__ia64__)
-#ifndef BSD
+#if !defined(BSD) || defined(__APPLE__)
     printf (SET(HAVE_INT64_T,1));
 #endif
 #endif
@@ -280,14 +280,15 @@ elif [ "$SYSNAME" = "alpha" ]; then
 fi
 if [ "$SYSNAME" = "mac" ]; then
     echo 's/ @libgcc_eh@//g
-	s/@SYSWARNS@/-Wno-long-double/g
 	s/lib$1.so/lib$1.dylib/g
 	s/lib$1.so.${MAJOR}.${MINOR}.${BUILD}/lib$1.${MAJOR}.${MINOR}.${BUILD}.dylib/g
 	s/lib$1.so.${MAJOR}.${MINOR}/lib$1.${MAJOR}.${MINOR}.dylib/g
 	s/lib$1.so.${MAJOR}/lib$1.${MAJOR}.dylib/g
-	s/@SHBLDFL@/-Wl,-single_module -compatibility_version 1 -current_version 1 -install_name $1 -Wl,-Y,1455 -dynamiclib -mmacosx-version-min=10.4/g' >>config.sed
-else
-    echo 's/ @SYSWARNS@//g' >>config.sed
+	s/ -s -Wl,-gc-sections/ -mmacosx-version-min=10.9/g
+	s/@SHBLDFL@/-Wl,-single_module -compatibility_version 1 -current_version 1 -install_name $1 -Wl,-Y,1455 -dynamiclib -mmacosx-version-min=10.9/g' >>config.sed
+    if [ "$CC" = "clang" ]; then
+	echo 's/ @libsupc++@/ @libc++abi@/g' >>config.sed
+    fi
 fi
 if [ "$SYSNAME" = "alpha" -o "$SYSNAME" = "mac" ]; then
     echo 's/#undef \(SIZE_OF_BOOL\)/#define \1 SIZE_OF_LONG/g' >>config.sed
@@ -297,7 +298,8 @@ fi
 if [ "$SYSNAME" = "linux" ]; then
     echo 's/#undef \(HAVE_RINTF\)/#define \1 1/g' >>config.sed
 else
-    echo 's/ -mfpmath=sse//g' >>config.sed
+    echo 's/-p --ignore-fail-on-non-empty//g
+	s/ -mfpmath=sse//g' >>config.sed
 fi
 if [ "$SYSNAME" = "mac" -o "$SYSNAME" = "bsd" ]; then
     echo 's/#define \(HAVE_STRSIGNAL\) 1/#undef \1/g' >>config.sed
@@ -402,7 +404,7 @@ fi
 
 SubHeadLibsProgs() {
 local INCPATH LIBPATH LIBSUFFIX found pname pcall esciv
-INCPATH="$ac_var_includedir $ac_var_gccincludedir $ac_var_customincdir $ac_var_oldincludedir"
+INCPATH="$ac_var_includedir $ac_var_gccincludedir $ac_var_customincdir $ac_var_oldincludedir /usr/include/x86_64-linux-gnu"
 INCPATH=`echo $INCPATH | sed 's/\\\\//g'`
 for i in $HEADERS; do
     for p in $INCPATH; do

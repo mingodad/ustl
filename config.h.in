@@ -264,7 +264,7 @@
 
 #if HAVE_CPP11
     #define USTL_LIBSUPCPP_LINKARG	" @libsupc++@"
-    static_assert (sizeof(USTL_LIBSUPCPP_LINKARG) == sizeof(" -lsupc++"),
+    static_assert (sizeof(USTL_LIBSUPCPP_LINKARG) != sizeof(""),
 	"configure was unable to find required library libsupc++.a . This "
 	"may occur if your distribution violates the Linux Filesystem "
 	"Standard by not storing system libraries in /usr/lib . To "

@@ -65,6 +65,12 @@ istream::size_type istream::readsome (void* s, size_type n)
     return ntr;
 }
 
+streamsize istream::underflow (streamsize n)
+{
+    verify_remaining ("read", "byte", n);
+    return remaining();
+}
+
 //--------------------------------------------------------------------
 
 /// Aligns the write pointer on \p grain. The skipped bytes are zeroed.

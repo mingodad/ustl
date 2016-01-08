@@ -147,7 +147,7 @@ off_t fstream::pos (void) const noexcept
 /// Reads \p n bytes into \p p.
 off_t fstream::read (void* p, off_t n)
 {
-    off_t br (0);
+    off_t br = 0;
     while ((br < n) & good())
 	br += readsome (advance (p, br), n - br);
     return br;
@@ -170,9 +170,9 @@ off_t fstream::readsome (void* p, off_t n)
 /// Writes \p n bytes from \p p.
 off_t fstream::write (const void* p, off_t n)
 {
-    off_t btw (n);
+    off_t btw = n;
     while (btw) {
-	const off_t bw (n - btw);
+	const off_t bw = n - btw;
 	ssize_t bwn = ::write (_fd, advance(p,bw), btw);
 	if (bwn > 0)
 	    btw -= bwn;

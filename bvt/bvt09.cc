@@ -38,7 +38,9 @@ void TestStringStreams (void)
     os << f << endl;
     os << d << endl;
     os << si << endl;
-    os << usi << endl << ends; 
+    os << usi << endl;
+    os << "Line to read with get" << endl;
+    os << "Line to read with getline" << endl;
     os.flush();
     cout << os.pos() << " bytes written" << endl;
 
@@ -62,6 +64,14 @@ void TestStringStreams (void)
     is >> si;
     is >> usi;
 
+    char gbuf[6];
+    is.get();	// skip newline after the last number
+    is.get (VectorBlock(gbuf));
+    string gstr, glstr;
+    is.get (gstr);
+    is.get();	// skip newline not read by get
+    is.getline (glstr);
+
     cout << "Values:" << endl;
     cout.format ("char:    '%c'\n", static_cast<int>(c));
     cout.format ("u_char:  '%c'\n", static_cast<int>(uc));
@@ -74,10 +84,12 @@ void TestStringStreams (void)
     cout.format ("double:  %.2f\n", d);
     cout.format ("short:   %d\n", static_cast<int>(si));
     cout.format ("u_short: %d\n", static_cast<int>(usi));
+    cout << "get:     " << gbuf << '.' << gstr << endl;
+    cout << "getline: " << glstr << endl;
     cout << endl;
 
     cout << "Dump:" << endl;
-    cout << os.str().cdata() << endl;
+    cout << os.str().cdata();
     cout << endl;
 }
 

@@ -3,13 +3,14 @@
 bvt/SRCS	:= $(wildcard bvt/bvt*.cc)
 bvt/BVTS	:= $(addprefix $O,$(bvt/SRCS:.cc=))
 bvt/OBJS	:= $(addprefix $O,$(bvt/SRCS:.cc=.o))
+bvt/RPATH	:= $(abspath $O.)
 ifdef BUILD_STATIC
 bvt/LIBS	:= ${LIBA}
 else
-bvt/LIBS	:= -L$(abspath $O.) -l${NAME}
+bvt/LIBS	:= -L${bvt/RPATH} -l${NAME}
 endif
 ifdef BUILD_SHARED
-bvt/LIBS	:= -Wl,--rpath=$(abspath $O.) ${bvt/LIBS}
+bvt/LIBS	:= -Wl,-rpath,${bvt/RPATH} ${bvt/LIBS}
 endif
 ifdef NOLIBSTDCPP
 bvt/LIBS	+= ${STAL_LIBS} -lm
@@ -27,8 +28,10 @@ bvt/all:	${bvt/BVTS}
 # When the bvt runs, its output is compared to .std
 #
 bvt/run:	${bvt/BVTS}
-	@echo "Running build verification tests:"
-	@for i in ${bvt/BVTS}; do	\
+	@echo "Running build verification tests:";\
+	export DYLD_LIBRARY_PATH="${bvt/RPATH}";\
+	export LD_LIBRARY_PATH="${bvt/RPATH}";\
+	for i in ${bvt/BVTS}; do	\
 	    BVT="bvt/$$(basename $$i)";	\
 	    echo "Running $$i";		\
 	    ./$$i < $$BVT.cc > $$i.out 2>&1;	\

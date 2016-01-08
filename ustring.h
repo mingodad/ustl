@@ -106,6 +106,9 @@ public:
     inline string&		append (const_wpointer s)			{ const_wpointer se (s); for (;se&&*se;++se) {} return append (s, se); }
     inline string&		append (const string& s)			{ return append (s.begin(), s.end()); }
     inline string&		append (const string& s, size_type o, size_type n)	{ return append (s.iat(o), s.iat(o+n)); }
+    inline void			push_back (value_type c)			{ resize(size()+1); end()[-1] = c; }
+    inline void			push_back (wvalue_type c)			{ append (1, c); }
+    inline void			pop_back (void)					{ resize (size()-1); }
     inline string&		assign (const_iterator i1, const_iterator i2)	{ return assign (i1, distance (i1, i2)); }
     string&	    		assign (const_pointer s, size_type len);
     string&	    		assign (const_pointer s);
@@ -131,7 +134,7 @@ public:
     inline const string&	operator= (const_pointer s)		{ return assign (s); }
     inline const string&	operator= (const_wpointer s)		{ return assign (s); }
     inline const string&	operator+= (const string& s)		{ return append (s.begin(), s.size()); }
-    inline const string&	operator+= (value_type c)		{ return append (1, c); }
+    inline const string&	operator+= (value_type c)		{ push_back(c); return *this; }
     inline const string&	operator+= (const_pointer s)		{ return append (s); }
     inline const string&	operator+= (wvalue_type c)		{ return append (1, c); }
     inline const string&	operator+= (const_wpointer s)		{ return append (s); }
@@ -161,9 +164,6 @@ public:
     string&			erase (size_type epo = 0, size_type n = npos);
     inline iterator		erase (const_iterator first, const_iterator last)	{ return erase (first, size_type(distance(first,last))); }
     inline iterator		eraser (size_type first, size_type last)		{ return erase (iat(first), iat(last)); }
-    inline void			push_back (value_type c)	{ append (1, c); }
-    inline void			push_back (wvalue_type c)	{ append (1, c); }
-    inline void			pop_back (void)			{ resize (size() - 1); }
     string&			replace (const_iterator first, const_iterator last, const_pointer i1, const_pointer i2, size_type n);
     template <typename InputIt>
     string&			replace (const_iterator first, const_iterator last, InputIt first2, InputIt last2)	{ return replace (first, last, first2, last2, 1); }
@@ -310,7 +310,7 @@ inline type name (const string& str, size_t* idx = nullptr, int base = 10) \
 {					\
     const char* sp = str.c_str();	\
     char* endp = nullptr;		\
-    type r = func (sp, &endp, base);	\
+    type r = func (sp, idx ? &endp : nullptr, base);\
     if (idx)				\
 	*idx = endp - sp;		\
     return r;				\
@@ -329,7 +329,7 @@ inline type name (const string& str, size_t* idx = nullptr) \
 {					\
     const char* sp = str.c_str();	\
     char* endp = nullptr;		\
-    type r = func (sp, &endp);		\
+    type r = func (sp, idx ? &endp : nullptr);\
     if (idx)				\
 	*idx = endp - sp;		\
     return r;				\
