@@ -5,7 +5,7 @@
 
 #pragma once
 #if HAVE_CPP14
-#include <uttraits.h>
+#include "uttraits.h"
 #include <errno.h>
 
 //----------------------------------------------------------------------

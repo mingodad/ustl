@@ -151,6 +151,69 @@ inline typename __make_unique<T>::__invalid_type
 
 #endif // HAVE_CPP14
 #endif // HAVE_CPP11
+
+//}}}-------------------------------------------------------------------
+//{{{ shared_ptr
+
+#if HAVE_CPP11
+
+/// \class shared_ptr memory.h stl.h
+/// \ingroup MemoryManagement
+/// \brief A smart pointer.
+/// Calls delete in the destructor; assignment shares ownership.
+template <typename T>
+class shared_ptr {
+public:
+    using element_type		= T;
+    using pointer		= element_type*;
+    using reference		= element_type&;
+private:
+    struct container {
+	pointer	p;
+	size_t	refs;
+	inline constexpr explicit container (pointer np) : p(np),refs(1) {}
+	inline	~container (void) { assert (!refs); delete p; }
+    };
+public:
+    inline constexpr		shared_ptr (void)		: _p (nullptr) {}
+    inline explicit		shared_ptr (pointer p)		: _p (new container (p)) {}
+    inline			shared_ptr (shared_ptr&& p)	: _p (p._p) { p._p = nullptr; }
+    inline			shared_ptr (const shared_ptr& p): _p (p._p) { if (_p) ++_p->refs; }
+    inline			~shared_ptr (void)		{ reset(); }
+    inline constexpr size_t	use_count (void) const		{ return _p ? _p->refs : 0; }
+    inline constexpr bool	unique (void) const		{ return use_count() == 1; }
+    inline constexpr pointer	get (void) const		{ return _p ? _p->p : nullptr; }
+    void			reset (pointer p = nullptr) {
+				    assert (p != get() || !p);
+				    auto ov = _p;
+				    _p = p ? new container(p) : nullptr;
+				    if (ov && !--ov->refs)
+					delete ov;
+				}
+    inline void			swap (shared_ptr& v)		{ swap (_p, v._p); }
+    inline constexpr explicit	operator bool (void) const	{ return get(); }
+    inline shared_ptr&		operator= (pointer p)		{ reset (p); return *this; }
+    inline shared_ptr&		operator= (shared_ptr&& p)	{ swap (p); return *this; }
+    inline shared_ptr&		operator= (const shared_ptr& p)	{ reset(); _p = p; if (_p) ++_p->refs; return *this; }
+    inline constexpr reference	operator* (void) const		{ assert (get()); return *get(); }
+    inline constexpr pointer	operator-> (void) const		{ assert (get()); return get(); }
+    inline constexpr reference	operator[] (size_t i) const	{ assert (get()); return get()[i]; }
+    inline constexpr bool	operator== (const pointer p) const	{ return get() == p; }
+    inline constexpr bool	operator== (const shared_ptr& p) const	{ return get() == p.get(); }
+    inline constexpr bool	operator< (const shared_ptr& p) const	{ return get() < p.get(); }
+private:
+    container*			_p;
+};
+
+#if HAVE_CPP14
+
+template <typename T, typename... Args>
+inline auto make_shared (Args&&... args)
+    { return shared_ptr<T> (new T (forward<Args>(args)...)); }
+
+#endif // HAVE_CPP14
+#endif // HAVE_CPP11
+
 //}}}-------------------------------------------------------------------
 //{{{ construct and destroy
 

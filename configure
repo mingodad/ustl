@@ -227,7 +227,9 @@ int main (void)
 	    printf (SET(CPU_HAS_%s,1), s_CpuCaps[i].name);
 #if __GNUC__ >= 3
     printf ("s/ @PROCESSOR_OPTS@/");
-    #if (__clang_major__ > 3 || (__clang_major__ == 3 && __clang_minor__ >= 2)) || (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
+    #if (__clang_major__ > 3 || (__clang_major__ == 3 && __clang_minor__ >= 6)) || __GNUC__ > 4
+	printf (" -std=c++14 -march=native");
+    #elif (__clang_major__ > 3 || (__clang_major__ == 3 && __clang_minor__ >= 2)) || (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
 	printf (" -std=c++11 -march=native");
     #else
 	if (caps & (1<<23))		printf (" -mmmx");

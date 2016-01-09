@@ -30,7 +30,7 @@ void TestTypelists (void)
     cout << "int == int is " << bool(IsSameType<int, int>::value) << endl;
     cout << "float == int is " << bool(IsSameType<float, int>::value) << endl;
 
-    Print (Select<Conversion<long,int>::exists2Way, int, float>::Result(567));
+    Print (Select<Conversion<long,int>::exists, int, float>::Result(567));
     cout << "Base is SuperSubclass from Derived is " << bool(SuperSubclass<Base,Derived>::value) << endl;
     cout << "Base is SuperSubclass from Base is " << bool(SuperSubclass<Base,Base>::value) << endl;
     cout << "Base is SuperSubclassStrict from Derived is " << bool(SuperSubclassStrict<Base,Derived>::value) << endl;
