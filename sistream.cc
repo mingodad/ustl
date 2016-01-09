@@ -88,7 +88,7 @@ inline void istringstream::read_number (T& v)
 }
 
 void istringstream::iread (int& v)		{ read_number (v); }
-void istringstream::iread (double& v)		{ read_number (v); } 
+void istringstream::iread (double& v)		{ read_number (v); }
 void istringstream::iread (long& v)		{ read_number (v); }
 #if HAVE_LONG_LONG
 void istringstream::iread (long long& v)	{ read_number (v); }
@@ -167,7 +167,7 @@ istringstream& istringstream::read (void* buffer, size_type sz)
 /// Reads characters into \p p,n until \p delim is found (but not stored or extracted)
 istringstream& istringstream::get (char* p, size_type n, char delim)
 {
-    for (char c, *pend = p+n-1; p < pend && (remaining() || underflow()); ++p) {
+    for (char c=0, *pend = p+n-1; p < pend && (remaining() || underflow()); ++p) {
 	istream::iread (c);
 	if (c == delim) {
 	    ungetc();

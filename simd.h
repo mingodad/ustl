@@ -18,6 +18,9 @@
 #include "ulimits.h"
 #if HAVE_MATH_H
     #include <math.h>
+	#ifdef _WIN32
+	double rint(double x);
+	#endif
 #endif
 
 namespace ustl {

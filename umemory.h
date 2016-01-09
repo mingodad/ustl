@@ -64,6 +64,8 @@ private:
 //{{{ unique_ptr
 #if HAVE_CPP11
 
+typedef decltype(nullptr) nullptr_t;
+
 /// \class unique_ptr memory.h stl.h
 /// \ingroup MemoryManagement
 /// \brief A smart pointer.
@@ -358,7 +360,7 @@ ForwardIterator uninitialized_fill_n (ForwardIterator first, size_t n, const T& 
 	construct (&*first, v);
     return first;
 }
-    
+
 } // namespace ustl
 
 //}}}-------------------------------------------------------------------

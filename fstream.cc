@@ -7,13 +7,22 @@
 #include "ustdxept.h"
 #include "uutility.h"
 #include <fcntl.h>
+#ifndef _WIN32
 #include <unistd.h>
-#include <errno.h>
-#include <sys/stat.h>
 #include <sys/ioctl.h>
 #if HAVE_SYS_MMAN_H
     #include <sys/mman.h>
 #endif
+#else
+#include <io.h>
+#define write _write
+#define read _read
+#define close _close
+#define lseek _lseek
+#endif
+#include <errno.h>
+#include <sys/stat.h>
+
 
 namespace ustl {
 
@@ -109,12 +118,19 @@ void fstream::detach (void) noexcept
 
 /// \brief Opens \p filename in the given mode.
 /// \warning The string at \p filename must exist until the object is closed.
+#ifndef _WIN32
 void fstream::open (const char* filename, openmode mode, mode_t perms)
 {
     int nfd = ::open (filename, om_to_flags(mode), perms);
     attach (nfd, filename);
 }
-
+#else
+void fstream::open (const char* filename, openmode mode, int)
+{
+	int nfd = _open(filename, om_to_flags(mode));
+    attach (nfd, filename);
+}
+#endif
 /// Closes the file and throws on error.
 void fstream::close (void)
 {

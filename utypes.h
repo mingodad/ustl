@@ -26,7 +26,9 @@
 #include <stddef.h>		// For ptrdiff_t, size_t
 #include <limits.h>
 #include <float.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 #ifndef SIZE_MAX
     #define SIZE_MAX		UINT_MAX
 #endif

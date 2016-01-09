@@ -9,6 +9,16 @@
 
 #include "ualgo.h"
 
+#if HAVE_MATH_H
+    #include <math.h>
+	#ifdef _WIN32
+	double rint(double x)
+	{
+		return floor(x+.5);
+	}
+	#endif
+#endif
+
 namespace ustl {
 
 // Generic version for implementing fill_nX_fast on non-i386 architectures.

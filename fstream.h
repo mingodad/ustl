@@ -26,7 +26,11 @@ public:
     explicit		fstream (const char* filename, openmode mode = in|out);
     explicit		fstream (int nfd, const char* filename = "");
 		       ~fstream (void) noexcept;
-    void		open (const char* filename, openmode mode, mode_t perms = 0644);
+#ifndef _WIN32
+	void		open (const char* filename, openmode mode, mode_t perms = 0644);
+#else
+	void		open (const char* filename, openmode mode, int perm = 0);
+#endif
     void		attach (int nfd, const char* filename = "");
     void		detach (void) noexcept;
     void		close (void);
