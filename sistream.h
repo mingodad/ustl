@@ -97,8 +97,8 @@ inline void istringstream::set_delimiters (const char* delimiters)
 }
 
 /// Reads a line of text from \p is into \p s
-inline istringstream& getline (istringstream& is, string& s)
-    { return is.getline (s); }
+inline istringstream& getline (istringstream& is, string& s, char delim = '\n')
+    { return is.getline (s, delim); }
 
 //----------------------------------------------------------------------
 
