@@ -264,6 +264,7 @@ template <typename T> add_rvalue_reference_t<T> declval (void) noexcept;
 
 //}}}-------------------------------------------------------------------
 //{{{ Type properties
+
 UNARY_TRAIT_DEFN (is_const);
 template <typename T> struct is_const<T const> : public true_type {};
 UNARY_TRAIT_DEFN (is_volatile);
@@ -273,6 +274,9 @@ UNARY_TRAIT_DEFB (is_empty,		__is_empty(T));
 UNARY_TRAIT_DEFB (is_abstract,		__is_abstract(T));
 UNARY_TRAIT_DEFB (is_literal_type,	__is_literal_type(T));
 UNARY_TRAIT_DEFB (is_polymorphic,	__is_polymorphic(T));
+#if HAVE_CPP14
+UNARY_TRAIT_DEFB (is_final,		__is_final(T));
+#endif
 UNARY_TRAIT_DEFB (is_standard_layout,	__is_standard_layout(T));
 UNARY_TRAIT_DEFB (is_pod,		__is_pod(T) || is_scalar<T>::value || (is_array<T>::value && is_scalar<remove_all_extents_t<T>>::value));
 UNARY_TRAIT_DEFB (is_trivial,		is_pod<T>::value || __is_trivial(T));
@@ -301,6 +305,98 @@ template <typename T> struct __decay<T, true, false>	{ using type = remove_exten
 template <typename T> struct __decay<T, false, true>	{ using type = add_pointer_t<T>; };
 template <typename T> struct decay : public __decay<remove_reference_t<T>> {};
 template <typename T> using decay_t = typename decay<T>::type;
+
+//}}}-------------------------------------------------------------------
+//{{{ Constructability and destructability
+
+// All these use the standard SFINAE technique
+struct __is_destructible {
+    template <typename T, typename = decltype(declval<T&>().~T())> static true_type test (int);
+    template <typename T> static false_type test (...);
+};
+template <typename T> struct is_destructible : public decltype(__is_destructible::test<T>(0)) {};
+
+struct __is_nothrow_destructible {
+    template <typename T> static integral_constant<bool, noexcept(declval<T&>().~T())> test (int);
+    template<typename> static false_type test (...);
+};
+template<typename T>
+struct is_nothrow_destructible : public decltype(__is_nothrow_destructible::test<T>(0)) {};
+
+struct __is_default_constructible {
+    template <typename T, typename = decltype(T())> static true_type test (int);
+    template <typename T> static false_type test (...);
+};
+template <typename T> struct is_default_constructible : public decltype(__is_default_constructible::test<T>(0)) {};
+
+struct __is_nothrow_default_constructible {
+    template <typename T, typename = decltype(T())> static integral_constant<bool, noexcept(T())> test (int);
+    template <typename T> static false_type test (...);
+};
+template <typename T> struct is_nothrow_default_constructible : public decltype(__is_nothrow_default_constructible::test<T>(0)) {};
+
+template <typename T> struct is_constructible : public is_default_constructible<T> {};
+template <typename T> struct is_nothrow_constructible : public is_nothrow_default_constructible<T> {};
+
+struct __is_copy_constructible {
+    template <typename T, typename = decltype(T(declval<T&>()))> static true_type test (int);
+    template <typename T> static false_type test (...);
+};
+template <typename T> struct is_copy_constructible : public decltype(__is_copy_constructible::test<T>(0)) {};
+
+struct __is_move_constructible {
+    template <typename T, typename = decltype(T(declval<T&&>()))> static true_type test (int);
+    template <typename T> static false_type test (...);
+};
+template <typename T> struct is_move_constructible : public decltype(__is_move_constructible::test<T>(0)) {};
+
+struct __is_assignable {
+    template <typename T, typename U, typename = decltype(declval<T>() = declval<U>())> static true_type test (int);
+    template <typename T, typename U> static false_type test (...);
+};
+template <typename T, typename U> struct is_assignable : public decltype(__is_assignable::test<T,U>(0)) {};
+
+template <typename T> struct is_copy_assignable : public is_assignable<T&, const T&> {};
+template <typename T> struct is_move_assignable : public is_assignable<T&, T&&> {};
+
+// TODO: later
+template <typename T> struct is_nothrow_copy_constructible : public false_type {};
+template <typename T> struct is_nothrow_move_constructible : public false_type {};
+template <typename T, typename U> struct is_nothrow_assignable : public false_type {};
+template <typename T> struct is_nothrow_copy_assignable : public false_type {};
+template <typename T> struct is_nothrow_move_assignable : public false_type {};
+
+#if __GNUC__ >= 5
+UNARY_TRAIT_DEFB (is_trivially_copyable,	__is_trivially_copyable(T));
+template <typename T, typename... Args>
+struct is_trivially_constructible : public integral_constant<bool, __is_trivially_constructible(T, Args...)> {};
+
+template<typename T>
+struct is_trivially_copy_constructible : public
+     integral_constant<bool, is_copy_constructible<T>::value
+				 && __is_trivially_constructible(T, const T&)> {};
+
+template<typename T>
+struct is_trivially_move_constructible : public
+     integral_constant<bool, is_move_constructible<T>::value
+				 && __is_trivially_constructible(T, T&&)> {};
+
+template<typename T, typename U>
+struct is_trivially_assignable : public integral_constant<bool, __is_trivially_assignable(T, U)> {};
+
+UNARY_TRAIT_DEFB (is_trivially_default_constructible,	__is_trivially_constructible(T));
+UNARY_TRAIT_DEFB (is_trivially_copy_assignable,	__is_trivially_assignable(T,const T&));
+UNARY_TRAIT_DEFB (is_trivially_move_assignable,	__is_trivially_assignable(T,T&&));
+#else
+UNARY_TRAIT_DEFB (is_trivially_copyable,		__has_trivial_copy(T));
+UNARY_TRAIT_DEFB (is_trivially_default_constructible,	__has_trivial_constructor(T));
+UNARY_TRAIT_DEFB (is_trivially_copy_assignable,		__has_trivial_assign(T));
+UNARY_TRAIT_DEFB (is_trivially_move_assignable,		false);
+#endif
+
+UNARY_TRAIT_DEFB (is_trivially_destructible,	__has_trivial_destructor(T));
+UNARY_TRAIT_DEFB (has_trivial_copy_constructor,	__has_trivial_copy(T));
+UNARY_TRAIT_DEFB (has_trivial_copy_assign,	__has_trivial_assign(T));
 
 //}}}-------------------------------------------------------------------
 //{{{ Type relations

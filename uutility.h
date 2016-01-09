@@ -13,6 +13,10 @@
 
 namespace ustl {
 
+#if HAVE_CPP11
+    using nullptr_t	= decltype(nullptr);
+#endif
+
 #if __GNUC__
     /// Returns the number of elements in a static vector
     #define VectorSize(v)	(sizeof(v) / sizeof(*v))
