@@ -22,6 +22,7 @@ public:
     static const size_type	c_MaxDelimiters = 16;	///< Maximum number of word delimiters.
 public:
 				istringstream (void) noexcept;
+    explicit			istringstream (const char* p) noexcept;
 				istringstream (const void* p, size_type n) noexcept;
     explicit			istringstream (const cmemlink& source) noexcept;
     inline fmtflags		flags (void) const		{ return _flags; }
